@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     
+<mapper namespace="com.example.mybatis.HomeMapper">
+    <select id="getUser" parameterType="int" resultType="int">
+<!--         select user_id from posts where user_id = #{user_id} -->
+        select user_id from posts
+    </select>
+     
+    <insert id="insertUser" parameterType="homeDTO">
+        insert into users values{
+            #{user_name},
+            #{user_passwd}          
+        }
+    </insert>
+     
+     
+</mapper>

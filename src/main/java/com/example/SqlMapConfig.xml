@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+     
+<configuration>
+    <properties resource="db.properties"/>
+     
+    <typeAliases>
+        <typeAlias alias="hashtagsDTO" type="com.example.dto.HashtagsDTO"/>   
+        <typeAlias alias="homeDTO" type="com.example.dto.HomeDTO"/>
+        <typeAlias alias="userDTO" type="com.example.dto.UserDTO"/>
+        <typeAlias alias="recentDTO" type="com.example.dto.RecentDTO"/>
+        <typeAlias alias="userSessionDTO" type="com.example.dto.UserSessionDTO"/>     
+        <typeAlias alias="postsDTO" type="com.example.dto.PostsDTO"/>     
+        <typeAlias alias="followingDTO" type="com.example.dto.FollowingDTO"/>     
+        <typeAlias alias="getParameterDTO" type="com.example.dto.GetParameterDTO"/>       
+        <typeAlias alias="groupsDTO" type="com.example.dto.GroupsDTO"/>       
+         
+    </typeAliases>
+     
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}" />
+                <property name="url" value="${url}" />
+                <property name="username" value="${username}" />
+                <property name="password" value="${password}" />                                          
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="com/example/demo/mybatis/HomeMapper.xml"/>
+        <mapper resource="com/example/demo/mybatis/UserMapper.xml"/>       
+        <mapper resource="com/example/demo/mybatis/BoardMapper.xml"/>      
+         
+    </mappers>
+     
+</configuration>
