@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="com.example.mybatis.BoardMapper">
+    <select id="selectRecent" resultType="recentDTO">
+        select post_hashtag, count from recentFavorite where rownum 
+        <![CDATA[ 
+            <=
+        ]]>
+        10 order by count desc
+    </select>
+    <select id="selectrealTimeList" resultType="recentDTO">
+        select post_hashtag, count from recentFavorite where rownum 
+        <![CDATA[ 
+            <=
+        ]]>
+        10 order by count desc
+    </select>
+    <select id="selectNewFollowerPostList"
+        parameterType="userSessionDTO" resultType="postsDTO">
+        select p.*, u.user_name
+        from posts p , (select following_id
+        from
+        followings
+        where user_id = #{user_id}) f, users u
+        where p.user_id =
+        following_id and
+        p.post_date  <![CDATA[>=]]>
+        sysdate - 7
+        and p.user_id = u.user_id
+        order by p.post_date
+    </select>
+ 
+ 
+    <select id="selectMyPosts" parameterType="userSessionDTO"
+        resultType="postsDTO">
+        select p.* , u.user_name
+        from posts p, users u
+        where
+        p.user_id = u.user_id and
+        u.user_id = ${user_id}
+        order by p.post_date
+        desc
+    </select>
+ 
+    <select id="selectOtherPostsLists"
+        parameterType="getParameterDTO" resultType="postsDTO">
+        select p.* , u.user_name
+        from posts p, users u
+        where
+        p.user_id = u.user_id and
+        u.user_id =
+        #{user_id}
+    </select>
+ 
+    <select id="selectMyHashtags" parameterType="userSessionDTO"
+        resultType="hashtagsDTO">
+        select hashtag, count(hashtag) count
+        from hashtags H , (select post_id
+        from posts
+        where post_date <![CDATA[>=]]>
+        sysdate - 7) P
+        where H.user_id = ${user_id} and P.post_id = H.post_id
+        group by hashtag
+        order by count DESC
+    </select>
+    <select id="selectSharedHashtags" parameterType="userSessionDTO"
+        resultType="hashtagsDTO">
+        select h.hashtag, count(*) count
+        from hashtags h, (select s.post_id as
+        post_id
+        from shared_posts s , posts a
+        where s.user_id = ${user_id} and
+        a.post_date <![CDATA[>=]]>
+        sysdate - 7 and
+        s.post_id = a.post_id) P
+        where h.post_id = P.post_id
+        group by h.hashtag
+        order by
+        count DESC
+    </select>
+    <select id="selectTeamHashtags" parameterType="getParameterDTO"
+        resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P, ( select department_id
+        from departments
+        where
+        department_id = ${department_id} ) I
+        where P.department_id =
+        I.department_id and P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <select id="selectOtherHashtags" parameterType="getParameterDTO"
+        resultType="hashtagsDTO">
+        select h.hashtag, count(h.hashtag) count, h.user_id
+        from hashtags H ,
+        (select post_id
+        from posts
+        where post_date <![CDATA[>=]]>
+        sysdate - 7) P
+        where H.user_id = #{user_id} and P.post_id = H.post_id
+        group by hashtag, h.user_id
+        order by count DESC
+    </select>
+ 
+    <select id="selectMyFollower" parameterType="userSessionDTO"
+        resultType="followingDTO">
+        select d.team_name, A.user_name, A.user_id
+        from departments
+        d, (select u.user_name, u.user_id, u.department_id
+        from followings f,
+        users u
+        where f.following_id = #{user_id} and f.user_id = u.user_id ) A
+        where d.department_id = A.department_id
+    </select>
+ 
+ 
+    <select id="selectMyFollowing" parameterType="userSessionDTO"
+        resultType="followingDTO">
+        select d.team_name, A.user_name, A.user_id
+        from departments
+        d, (select u.user_name, u.user_id, u.department_id
+        from followings f,
+        users u
+        where f.user_id = #{user_id} and f.following_id = u.user_id ) A
+        where
+        d.department_id = A.department_id
+    </select>
+ 
+    <select id="selectSearchHashs" parameterType="HashMap"
+        resultType="postsDTO">
+        select p.*, u.user_name
+        from departments D , users u, (select *
+        from posts P
+        where P.post_id in (select H.post_id
+        from hashtags H
+        where H.hashtag =<![CDATA[ #{search} ]]>))
+        P
+        where D.department_id = P.department_id and p.user_id = u.user_id
+    </select>
+    <select id="selectSearchPosts" parameterType="HashMap"
+        resultType="postsDTO">
+        select p.*, u.user_name
+        from departments D , users u, (select *
+        from
+        posts
+        where
+        DBMS_LOB.INSTR(post_contents, <![CDATA[#{search} ]]>)
+        > 0 or post_name like
+        <![CDATA['%${search}%']]>)
+        P
+        where D.department_id = P.department_id and p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectMyPostHashList" parameterType="userSessionDTO"
+        resultType="hashtagsDTO">
+        select hashtag
+        from hashtags
+    </select>
+ 
+    <select id="selectNewFollowerHashList"
+        parameterType="userSessionDTO" resultType="hashtagsDTO">
+        select h.hashtag
+        from
+        hashtags h, posts p
+        where h.user_id = p.user_id and
+        h.user_id =
+        ${user_id}
+    </select>
+    <select id="selectMyKeywordPosts" parameterType="userSessionDTO"
+        resultType="postsDTO">
+        select p.*, u.user_name
+        from posts p , users u,(select
+        post_id
+        from hashtags
+        where user_id = ${user_id} and hashtag = #{user_passwd}
+        group by post_id) s
+        where p.post_id = s.post_id and p.user_id = u.user_id
+    </select>
+    <select id="selectMyKeywordPostHashList"
+        parameterType="userSessionDTO" resultType="hashtagsDTO">
+        select hashtag
+        from hashtags
+    </select>
+    <select id="selectOtherKeywordPostHashList"
+        parameterType="getParameterDTO" resultType="hashtagsDTO">
+        select p.* , u.user_name
+        from posts p, users u
+    </select>
+ 
+    <select id="selectTeamposts" parameterType="getParameterDTO"
+        resultType="postsDTO">
+        select P.* , u.*
+        from posts P, users u, ( select
+        department_id
+        from departments
+        where department_id = ${department_id} )
+        I
+        where P.department_id =
+        I.department_id and P.post_date >= sysdate - 7
+        and p.user_id = u.user_id
+    </select>
+    <select id="selectTeamKeywordPosts"
+        parameterType="userSessionDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from
+        posts p , (select u.user_id as user_id , u.user_name as user_name
+        from
+        users u, ( select department_id
+        from departments
+        where department_id =
+        #{department_id} ) D
+        where u.department_id = D.department_id) a
+        where
+        p.user_id = a.user_id and
+        p.post_id in (select post_id
+    </select>
+    <select id="selectTeamPostHashList"
+        parameterType="userSessionDTO" resultType="hashtagsDTO">
+        select hashtag
+        from hashtags
+    </select>
+    <select id="selectTeamKeywordPostHashList"
+        parameterType="userSessionDTO" resultType="hashtagsDTO">
+        select H.hashtag
+        from
+        hashtags
+    </select>
+    <select id="selectOtherPostHashList"
+        parameterType="getParameterDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P
+        where P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id and
+        u.user_id = #{user_id}
+        group by H.hashtag
+    </select>
+    <select id="selectTeamKeywordPostsList"
+        parameterType="getParameterDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from posts p , (select u.user_id as user_id , u.user_name as user_name
+        from users u, ( select department_id
+        from departments
+        where
+        department_id = #{department_id} ) D
+        where u.department_id =
+        D.department_id) a
+        where p.user_id = a.user_id and
+        p.post_id in (select
+        post_id
+        from hashtags
+        where hashtag = #{keyword})
+    </select>
+    <select id="selectOtherKeywordPostsList"
+        parameterType="getParameterDTO" resultType="postsDTO">
+        select p.* , u.user_name
+        from posts p, users u, (select post_id from hashtags where hashtag =
+        #{keyword} and user_id = #{user_id}) h
+        where
+        p.user_id = u.user_id and
+        p.post_id = h.post_id
+    </select>
+ 
+    <!-- 그룹/팀 -->
+    <select id="selectGroupTeamAllKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select P.* , u.*
+        from posts P, users u, ( select department_id
+        from
+        departments
+        where department_id = #{department_id} ) I
+        where
+        P.department_id =
+        I.department_id and P.post_date <![CDATA[>=]]>
+        sysdate - 7
+        and p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectGroupTeamSpecKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from posts p , (select u.user_id as user_id ,
+        u.user_name as user_name
+        from users u, ( select department_id
+        from
+        departments
+        where department_id = #{department_id} ) D
+        where
+        u.department_id = D.department_id) a
+        where p.user_id = a.user_id and
+        p.post_date <![CDATA[>=]]>
+        sysdate - 7 and p.post_id in (select post_id
+        from hashtags
+        where hashtag
+        = #{keyword})
+    </select>
+    <select id="selectGroupTeamAllKeyHashtagsList"
+        parameterType="groupsDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P, ( select department_id
+        from departments
+        where
+        department_id = ${department_id} ) I
+        where P.department_id =
+        I.department_id and P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <!-- 그룹/실 -->
+    <select id="selectGroupLabAllKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select P.* , u.*
+        from posts P, users u, ( select department_id
+        from
+        departments
+        where lab_id = ${lab_id} ) I
+        where P.department_id =
+        I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7
+        and p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectGroupLabSpecKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from posts p , (select u.user_id as user_id ,
+        u.user_name as user_name
+        from users u, ( select department_id
+        from
+        departments
+        where lab_id = #{lab_id} ) D
+        where u.department_id =
+        D.department_id) a
+        where p.user_id = a.user_id and
+        p.post_date <![CDATA[>=]]>
+        sysdate - 7 and p.post_id in (select post_id
+        from hashtags
+        where hashtag
+        = #{keyword})
+    </select>
+ 
+ 
+    <select id="selectGroupLabAllKeyHashtagsList"
+        parameterType="groupsDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P, ( select department_id
+        from departments
+        where
+        lab_id = ${lab_id} ) I
+        where P.department_id = I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <!-- 사업부 -->
+    <select id="selectGroupBusiAllKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select P.* , u.user_name
+        from posts P, users u, ( select department_id
+        from departments
+        where bus_id = ${bus_id} ) I
+        where P.department_id =
+        I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7
+        and p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectGroupBusiSpecKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from posts p , (select u.user_id as user_id ,
+        u.user_name as user_name
+        from users u, ( select department_id
+        from
+        departments
+        where bus_id = #{bus_id} ) D
+        where u.department_id =
+        D.department_id) a
+        where p.user_id = a.user_id and
+        p.post_date <![CDATA[>=]]>
+        sysdate - 7 and p.post_id in (select post_id
+        from hashtags
+        where hashtag
+        = #{keyword})
+    </select>
+ 
+ 
+    <select id="selectGroupBusiAllKeyHashtagsList"
+        parameterType="groupsDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P, ( select department_id
+        from departments
+        where
+        bus_id = ${bus_id} ) I
+        where P.department_id = I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <!-- 부문 -->
+    <select id="selectGroupFieldAllKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select P.* , u.*
+        from posts P, users u, ( select department_id
+        from
+        departments
+        where field_id = ${field_id} ) I
+        where P.department_id =
+        I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7
+        and p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectGroupFieldSpecKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select p.*, a.user_name
+        from posts p , (select u.user_id as user_id ,
+        u.user_name as user_name
+        from users u, ( select department_id
+        from
+        departments
+        where field_id = #{field_id} ) D
+        where u.department_id =
+        D.department_id) a
+        where p.user_id = a.user_id and
+        p.post_date <![CDATA[>=]]>
+        sysdate - 7 and p.post_id in (select post_id
+        from hashtags
+        where hashtag
+        = #{keyword})
+    </select>
+ 
+ 
+    <select id="selectGroupFieldAllKeyHashtagsList"
+        parameterType="groupsDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P, ( select department_id
+        from departments
+        where
+        field_id = ${field_id} ) I
+        where P.department_id = I.department_id and
+        P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <!-- 전체 -->
+    <select id="selectGroupAllAllKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select P.* , u.user_name
+        from posts P, users u
+        where P.post_date <![CDATA[>=]]>sysdate
+        - 7 and
+        p.user_id = u.user_id
+    </select>
+ 
+    <select id="selectGroupAllSpecKeyPostsList"
+        parameterType="groupsDTO" resultType="postsDTO">
+        select p.*, u.user_name
+        from posts p , users u
+        where p.user_id =
+        u.user_id and p.post_date <![CDATA[>=]]>
+        sysdate - 7 and p.post_id in (select post_id
+        from hashtags
+        where hashtag
+        = #{keyword})
+    </select>
+ 
+    <select id="selectGroupAllAllKeyHashtagsList"
+        parameterType="groupsDTO" resultType="hashtagsDTO">
+        select H.hashtag, count(*) count
+        from hashtags H, (select P.user_id as
+        user_id
+        from posts P
+        where P.post_date <![CDATA[>=]]>
+        sysdate - 7) U
+        where H.user_id = U.user_id
+        group by H.hashtag
+        order by
+        count
+        DESC
+    </select>
+    <select id="selectSharedPostsList"
+        parameterType="userSessionDTO" resultType="postsDTO">
+        select p.*, u.user_name
+        from posts p , users u , (select post_id
+        from shared_posts
+        where user_id = #{user_id}) s
+        where p.post_id = s.post_id and p.user_id = u.user_id
+ 
+    </select>
+    <select id="selectSharedSpecKeyPostsList"
+        parameterType="getParameterDTO" resultType="postsDTO">
+        select p.*, u.user_name
+        from posts p , users u , (select post_id
+        from shared_posts
+        where user_id = #{user_id}) s
+        where p.post_id = s.post_id and p.user_id = u.user_id and p.post_id in
+        (select post_id
+        from hashtags
+        where hashtag = #{keyword})
+    </select>
+ 
+ 
+</mapper>

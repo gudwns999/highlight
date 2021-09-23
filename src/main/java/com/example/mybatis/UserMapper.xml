@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+     
+<mapper namespace="com.example.mybatis.UserMapper">
+    <select id="findUser" parameterType="HashMap" resultType="java.lang.Integer">
+        select count(*) 
+        from users
+        where user_id     = #{user_id}       and 
+              user_passwd = #{user_passwd}
+    </select>
+     
+    <insert id="registerUser" parameterType="userDTO">
+        insert into users values (
+            #{user_id},
+            #{user_email},          
+            #{user_name},
+            #{user_passwd},
+            #{department_id}
+        )
+    </insert>
+    <insert id="insertFollowing" parameterType="followingDTO">
+        insert into followings values (
+            #{user_id},
+            #{following_id}
+        )
+    </insert>
+     
+    <select id="selectUser" parameterType="HashMap" resultType="userDTO">
+        select *
+        from users
+        where user_id =#{user_id}
+    </select>
+ 
+    <select id="selectTeam" parameterType="userSessionDTO" resultType="userDTO">
+        select d.*, u.user_id
+        from users u, departments d
+        where u.user_id =#{user_id} and
+              u.department_id = d.department_id
+    </select> 
+        <select id="selectSearchUser" parameterType="userDTO" resultType="userDTO">
+        select u.*, d.team_name
+        from users u, departments d
+        where u.user_name =#{user_name} and
+              u.department_id = d.department_id
+    </select>
+     
+     
+</mapper>
