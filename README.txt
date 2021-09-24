@@ -54,6 +54,12 @@ src
     |_scss  
     |_tree_fontello  
     |_vendor  
+      |_bootstrap  
+      |_chart.js  
+      |_datatables  
+      |_fontawesome-free  
+      |_jquery  
+      |_jquery-easing
     |_jsp  
       *admin_followings.jsp  
       *admin_hashtags.jsp  
@@ -92,3 +98,8 @@ src
       *sharedFunction.jsp  
       *sideBar.jsp  
       *test.jsp  
+
+크롬 확장 프로그램 :
+*background.js
+*content.js
+*popup.js
